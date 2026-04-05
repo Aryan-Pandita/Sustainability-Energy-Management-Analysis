@@ -14,5 +14,5 @@ An interactive web dashboard for monitoring energy consumption, waste generation
 - Vanilla JavaScript
 - Chart.js (Data Visualization)
 
-## GO TO DASHBOARD Analysis
+## GO TO DASHBOARD 
 [View Live Dashboard](https://aryan-pandita.github.io/energy-management-dashboard/)
