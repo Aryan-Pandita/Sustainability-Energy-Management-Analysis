@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Energy & Waste Management Analysis</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <div class="logo" style="justify-content: center; margin-bottom: 1.5rem; flex-direction: column; gap: 0.5rem; text-align: center;">
+                <img src="logo_natural.png" alt="Energy Management Logo" style="width: 90px; object-fit: contain; mix-blend-mode: screen; filter: grayscale(1) invert(1) contrast(3) brightness(1.2);">
+                <h2 style="font-size: 1rem; font-weight: 700; background: linear-gradient(to right, var(--accent-mint), var(--accent-electric)); -webkit-background-clip: text; background-clip: text; color: transparent; letter-spacing: 1px; margin: 0; line-height: 1.2;">ENERGY MANAGEMENT</h2>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <h3>Dashboards</h3>
+                <a href="#live-section" class="nav-link active">Live Pulse</a>
+                <a href="#historic-section" class="nav-link">Historical Analysis</a>
+                <hr style="border-color: var(--border-color); margin: 1.5rem 0;">
+                <h3>Modules</h3>
+                <a href="#liveStreamChart" class="nav-link">Real-Time Telemetry</a>
+                <a href="#trendChart" class="nav-link">Trend Analysis</a>
+                <a href="#indiaMapContainer" class="nav-link">Geolocation Tracing</a>
+                <a href="#energyMatrixChart" class="nav-link">Energy Matrix</a>
+                <a href="#recyclingChart" class="nav-link">Recycling Logistics</a>
+            </nav>
+
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header>
+                <h1>Live Monitoring Dashboard</h1>
+                <p>Real-time Pulse of Population, Energy, and Waste</p>
+                <div class="pulse-indicator"><span class="pulse"></span> Live Data Feed Active</div>
+            </header>
+
+            <!-- Live KPIs -->
+            <section class="kpi-grid live-kpis">
+                <div class="kpi-card glassmorphism live-card">
+                    <p class="kpi-title">Current Energy Load</p>
+                    <h3 id="liveEnergy">425</h3>
+                    <div class="trend"><span>MW</span></div>
+                </div>
+                <div class="kpi-card glassmorphism live-card">
+                    <p class="kpi-title">Current Waste Influx</p>
+                    <h3 id="liveWaste">112</h3>
+                    <div class="trend"><span>Tonnes/Hr</span></div>
+                </div>
+
+                <div class="kpi-card glassmorphism live-card">
+                    <p class="kpi-title">Total Energy Generated</p>
+                    <h3 id="liveEnergyGen">560</h3>
+                    <div class="trend"><span>MW</span></div>
+                </div>
+                <div class="kpi-card glassmorphism live-card">
+                    <p class="kpi-title">Renewable Energy Output</p>
+                    <h3 id="liveRenewable">135</h3>
+                    <div class="trend"><span>MW</span></div>
+                </div>
+            </section>
+
+            <section class="charts-section live-charts" style="margin-bottom: 2rem;">
+                <div class="chart-container glassmorphism" style="grid-column: span 12;">
+                    <h3>Real-Time Energy & Waste Telemetry</h3>
+                    <div class="canvas-wrapper live-canvas">
+                        <canvas id="liveStreamChart"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <hr style="border-color: var(--border-color); margin: 2rem 0;">
+            
+            <header id="historic-section" class="historic-header" style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 1rem; margin-bottom: 2rem;">
+                <div>
+                    <h1>Historical & Geolocation Analysis</h1>
+                    <p style="color: var(--text-muted); margin-top: 0.5rem;">Filter by State/City context</p>
+                </div>
+                
+                <div class="inline-filters" style="display: flex; gap: 1rem; align-items: center;">
+                    <div class="filter-group" style="margin: 0; min-width: 120px;">
+                        <label for="yearFilter" style="display: none;">Year</label>
+                        <select id="yearFilter" class="year-select">
+                            <option value="All">All Years</option>
+                            <option value="2011">2011</option>
+                            <option value="2012">2012</option>
+                        </select>
+                    </div>
+                    <div class="filter-group" style="margin: 0; min-width: 140px;">
+                        <label for="monthFilter" style="display: none;">Month</label>
+                        <select id="monthFilter" class="month-select">
+                            <option value="All">All Months</option>
+                            <option value="1">Jan (1)</option>
+                            <option value="2">Feb (2)</option>
+                            <option value="3">Mar (3)</option>
+                            <option value="4">Apr (4)</option>
+                            <option value="5">May (5)</option>
+                            <option value="6">Jun (6)</option>
+                            <option value="7">Jul (7)</option>
+                            <option value="8">Aug (8)</option>
+                            <option value="9">Sep (9)</option>
+                            <option value="10">Oct (10)</option>
+                            <option value="11">Nov (11)</option>
+                            <option value="12">Dec (12)</option>
+                        </select>
+                    </div>
+                    <div class="filter-group" style="margin: 0; min-width: 140px;">
+                        <label for="cityFilter" style="display: none;">City</label>
+                        <select id="cityFilter" class="city-select">
+                            <option value="All">All Cities</option>
+                            <option value="Ahmedabad">Ahmedabad</option>
+                            <option value="Surat">Surat</option>
+                            <option value="Vadodara">Vadodara</option>
+                            <option value="Rajkot">Rajkot</option>
+                            <option value="Gandhinagar">Gandhinagar</option>
+                        </select>
+                    </div>
+                </div>
+            </header>
+
+            <!-- KPIs -->
+            <section class="kpi-grid">
+                <div class="kpi-card glassmorphism">
+                    <p class="kpi-title">Total Energy Consumption</p>
+                    <h3 id="kpiEnergy">0</h3>
+                    <div class="trend positive"><span>GWh</span></div>
+                </div>
+                <div class="kpi-card glassmorphism">
+                    <p class="kpi-title">Total Waste Generated</p>
+                    <h3 id="kpiWaste">0</h3>
+                    <div class="trend negative"><span>Metric Tons</span></div>
+                </div>
+                <div class="kpi-card glassmorphism">
+                    <p class="kpi-title">Total Renewable Energy</p>
+                    <h3 id="kpiRenewable">0</h3>
+                    <div class="trend positive"><span>GWh</span></div>
+                </div>
+                <div class="kpi-card glassmorphism">
+                    <p class="kpi-title">Total Population Covered</p>
+                    <h3 id="kpiPopulation">0</h3>
+                    <div class="trend neutral"><span>Citizens</span></div>
+                </div>
+            </section>
+
+            <!-- Charts -->
+            <section class="charts-section">
+                <div class="chart-container glassmorphism" style="grid-column: span 8;">
+                    <h3>Consumption vs Waste Trend (Monthly)</h3>
+                    <div class="canvas-wrapper">
+                        <canvas id="trendChart"></canvas>
+                    </div>
+                </div>
+                <div class="chart-container glassmorphism" style="grid-column: span 4;">
+                    <h3>Renewable vs Non-Renewable (By City)</h3>
+                    <div class="canvas-wrapper">
+                        <canvas id="renewableChart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="chart-container glassmorphism" style="grid-column: span 6;">
+                    <h3>Energy vs Waste by City</h3>
+                    <div class="canvas-wrapper">
+                        <canvas id="cityComparisonChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-container glassmorphism" style="grid-column: span 6;">
+                    <h3>Population Correlation</h3>
+                    <div class="canvas-wrapper">
+                        <canvas id="bubbleChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-container glassmorphism" style="grid-column: span 6;">
+                    <h3>City Profile (Radar)</h3>
+                    <div class="canvas-wrapper">
+                        <canvas id="radarChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-container glassmorphism" style="grid-column: span 6;">
+                    <h3>Waste Distribution (Polar Area)</h3>
+                    <div class="canvas-wrapper">
+                        <canvas id="polarAreaChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-container glassmorphism" style="grid-column: span 12;">
+                    <h3>National Overview (All States Snapshot)</h3>
+                    <div class="canvas-wrapper" id="indiaMapContainer" style="height: 500px;">
+                        <!-- Google chart map will render here -->
+                    </div>
+                </div>
+            </section>
+
+            <hr style="border-color: var(--border-color); margin: 2rem 0;">
+
+            <header id="deep-matrix-section">
+                <h1>Matrix & Logistics Analysis</h1>
+                <p style="color: var(--text-muted); margin-top: 0.5rem;">Evaluating fundamental composition patterns</p>
+            </header>
+
+            <section class="charts-section">
+                <div class="chart-container glassmorphism" style="grid-column: span 6;">
+                    <h3>Energy Matrix Breakdown</h3>
+                    <div class="canvas-wrapper">
+                        <canvas id="energyMatrixChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-container glassmorphism" style="grid-column: span 6;">
+                    <h3>Recycling vs Landfill Logistics</h3>
+                    <div class="canvas-wrapper">
+                        <canvas id="recyclingChart"></canvas>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="data.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
