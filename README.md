@@ -1,4 +1,4 @@
-# Gujarat Energy Management Dashboard
+# Sustainability Energy Management Analysis Dashboard
 
 An interactive web dashboard for monitoring energy consumption, waste generation, and renewable output in Gujarat, India.
 
