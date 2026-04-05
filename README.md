@@ -1,4 +1,4 @@
-#  Energy Management Dashboard
+# Gujarat Energy Management Dashboard
 
 An interactive web dashboard for monitoring energy consumption, waste generation, and renewable output in Gujarat, India.
 
@@ -14,5 +14,5 @@ An interactive web dashboard for monitoring energy consumption, waste generation
 - Vanilla JavaScript
 - Chart.js (Data Visualization)
 
-## GO TO DASHBOARD 
+## GO TO DASHBOARD
 [View Live Dashboard](https://aryan-pandita.github.io/Sustainability-Energy-Management-Analysis/)
