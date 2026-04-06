@@ -381,15 +381,33 @@ header p {
         padding: 1rem;
         border-right: none;
         border-bottom: 1px solid var(--border-color);
-        gap: 1rem;
         position: sticky;
         top: 0;
         z-index: 100;
+        margin-left: 0 !important; /* Disabling desktop animation for mobile */
+    }
+
+    .sidebar.collapsed .sidebar-nav {
+        display: none;
+    }
+
+    .mobile-toggle-btn {
+        display: block !important;
+        background: transparent;
+        border: none;
+        color: var(--text-main);
+        padding: 0.5rem;
+        border-radius: 8px;
+        cursor: pointer;
+    }
+
+    .mobile-toggle-btn:hover {
+        background: rgba(255, 255, 255, 0.1);
     }
 
     .logo {
         flex-direction: row !important;
-        margin-bottom: 0.5rem !important;
+        margin-bottom: 0 !important;
         justify-content: flex-start !important;
         text-align: left !important;
     }
@@ -401,6 +419,10 @@ header p {
     .sidebar-nav {
         flex-direction: row;
         flex-wrap: wrap;
+        width: 100%;
+        margin-top: 1rem;
+        border-top: 1px solid rgba(255,255,255,0.1);
+        padding-top: 1rem;
     }
 
     .sidebar-nav h3 {
