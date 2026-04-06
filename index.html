@@ -12,9 +12,14 @@
 <body>
     <div class="dashboard-container">
         <aside class="sidebar">
-            <div class="logo" style="justify-content: center; margin-bottom: 1.5rem; flex-direction: column; gap: 0.5rem; text-align: center;">
-                <img src="logo_natural.png" alt="Energy Management Logo" style="width: 90px; object-fit: contain; mix-blend-mode: screen; filter: grayscale(1) invert(1) contrast(3) brightness(1.2);">
-                <h2 style="font-size: 1rem; font-weight: 700; background: linear-gradient(to right, var(--accent-mint), var(--accent-electric)); -webkit-background-clip: text; background-clip: text; color: transparent; letter-spacing: 1px; margin: 0; line-height: 1.2;">ENERGY MANAGEMENT</h2>
+            <div class="sidebar-top-group" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                <div class="logo" style="justify-content: center; flex-direction: column; gap: 0.5rem; text-align: center;">
+                    <img src="logo_natural.png" alt="Energy Management Logo" style="width: 90px; object-fit: contain; mix-blend-mode: screen; filter: grayscale(1) invert(1) contrast(3) brightness(1.2);">
+                    <h2 style="font-size: 1rem; font-weight: 700; background: linear-gradient(to right, var(--accent-mint), var(--accent-electric)); -webkit-background-clip: text; background-clip: text; color: transparent; letter-spacing: 1px; margin: 0; line-height: 1.2;">ENERGY MANAGEMENT</h2>
+                </div>
+                <button id="mobileSidebarToggle" class="mobile-toggle-btn" style="display: none;" title="Toggle Menu">
+                    <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                </button>
             </div>
             
             <nav class="sidebar-nav">
@@ -37,7 +42,7 @@
             <button id="sidebarToggle" class="desktop-toggle-btn" title="Toggle Sidebar">
                 <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"></path></svg>
             </button>
-            <header>
+            <header id="live-section">
                 <h1>Live Monitoring Dashboard</h1>
                 <p>Real-time Pulse of Population, Energy, and Waste</p>
                 <div class="pulse-indicator"><span class="pulse"></span> Live Data Feed Active</div>
