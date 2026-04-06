@@ -1,7 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     const rawData = window.dashboardData;
     
-    // UI Elements
     const yearFilter = document.getElementById('yearFilter');
     const monthFilter = document.getElementById('monthFilter');
     const cityFilter = document.getElementById('cityFilter');
@@ -11,7 +10,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const kpiRenewable = document.getElementById('kpiRenewable');
     const kpiPopulation = document.getElementById('kpiPopulation');
 
-    // Chart Instances
     let trendChartInstance = null;
     let renewableChartInstance = null;
     let cityComparisonChartInstance = null;
@@ -25,7 +23,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let liveInterval = null;
 
-    // Theme Config
     Chart.defaults.color = '#9ca3af';
     Chart.defaults.font.family = "'Inter', sans-serif";
 
