@@ -1,558 +1,473 @@
-document.addEventListener('DOMContentLoaded', () => {
-    const rawData = window.dashboardData;
+:root {
+    --bg-dark: #1f2937;
+    --card-bg: rgba(55, 65, 81, 0.7);
+    --border-color: rgba(255, 255, 255, 0.1);
+    --text-main: #f3f4f6;
+    --text-muted: #9ca3af;
     
-    // UI Elements
-    const yearFilter = document.getElementById('yearFilter');
-    const monthFilter = document.getElementById('monthFilter');
-    const cityFilter = document.getElementById('cityFilter');
-    
-    const kpiEnergy = document.getElementById('kpiEnergy');
-    const kpiWaste = document.getElementById('kpiWaste');
-    const kpiRenewable = document.getElementById('kpiRenewable');
-    const kpiPopulation = document.getElementById('kpiPopulation');
+    --accent-electric: #38bdf8;
+    --accent-mint: #34d399;
+    --accent-warning: #fb923c;
+    --accent-danger: #ef4444;
+}
 
-    // Chart Instances
-    let trendChartInstance = null;
-    let renewableChartInstance = null;
-    let cityComparisonChartInstance = null;
-    let bubbleChartInstance = null;
-    let radarChartInstance = null;
-    let polarAreaChartInstance = null;
-    let liveChartInstance = null;
-    let energyMatrixChartInstance = null;
-    let recyclingChartInstance = null;
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
 
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--bg-dark);
+    background-image: 
+        radial-gradient(circle at 15% 50%, rgba(56, 189, 248, 0.1), transparent 25%),
+        radial-gradient(circle at 85% 30%, rgba(52, 211, 153, 0.1), transparent 25%);
+    color: var(--text-main);
+    min-height: 100vh;
+    overflow-x: hidden;
+}
 
-    let liveInterval = null;
+.dashboard-container {
+    display: flex;
+    height: 100vh;
+}
 
-    // Theme Config
-    Chart.defaults.color = '#9ca3af';
-    Chart.defaults.font.family = "'Inter', sans-serif";
+/* Sidebar */
+.sidebar {
+    width: 280px;
+    background-color: rgba(31, 41, 55, 0.8);
+    backdrop-filter: blur(12px);
+    border-right: 1px solid var(--border-color);
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    z-index: 10;
+    transition: margin-left 0.3s ease;
+}
 
-    // Format Numbers
-    const formatNum = (num) => new Intl.NumberFormat('en-IN').format(num);
+.sidebar.collapsed {
+    margin-left: -280px;
+}
 
-    const getFilteredData = () => {
-        let filtered = rawData;
-        if (yearFilter.value !== 'All') {
-            filtered = filtered.filter(d => d.year == yearFilter.value);
-        }
-        if (monthFilter.value !== 'All') {
-            filtered = filtered.filter(d => d.month == monthFilter.value);
-        }
-        if (cityFilter.value !== 'All') {
-            filtered = filtered.filter(d => d.city === cityFilter.value);
-        }
-        return filtered;
-    };
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
 
-    const updateDashboard = () => {
-        const data = getFilteredData();
-        
-        // Update KPIs
-        const totalEnergy = data.reduce((sum, d) => sum + d.energyConsumption, 0);
-        const totalWaste = data.reduce((sum, d) => sum + d.wasteGenerated, 0);
-        const totalRenewable = data.reduce((sum, d) => sum + d.renewableEnergy, 0);
-        
-        // For population, we take average of the available filtered data to mock distinct citizens
-        const avgPopulation = data.length > 0 ? 
-            Math.floor(data.reduce((sum, d) => sum + d.population, 0) / data.length) : 0;
+.logo-icon {
+    width: 32px;
+    height: 32px;
+    background: linear-gradient(135deg, var(--accent-mint), var(--accent-electric));
+    border-radius: 8px;
+    box-shadow: 0 0 15px rgba(0, 242, 254, 0.5);
+}
 
-        kpiEnergy.textContent = formatNum(totalEnergy);
-        kpiWaste.textContent = formatNum(totalWaste);
-        kpiRenewable.textContent = formatNum(totalRenewable);
-        kpiPopulation.textContent = formatNum(avgPopulation);
+.logo h2 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    background: linear-gradient(to right, #f3f4f6, #9ca3af);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
 
-        updateTrendChart(data);
-        updateRenewableChart(data);
-        updateCityComparisonChart(data);
-        updateBubbleChart(data);
-        updateRadarChart(data);
-        updatePolarAreaChart(data);
-        updateEnergyMatrixChart(data);
-        updateRecyclingChart(data);
-    };
+.sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
 
-    const updateRadarChart = (data) => {
-        const ctx = document.getElementById('radarChart').getContext('2d');
-        
-        const grouped = {};
-        data.forEach(d => {
-            if (!grouped[d.city]) grouped[d.city] = { energy: 0, waste: 0, ren: 0, count: 0 };
-            grouped[d.city].energy += d.energyConsumption;
-            grouped[d.city].waste += d.wasteGenerated;
-            grouped[d.city].ren += d.renewableEnergy;
-            grouped[d.city].count += 1;
-        });
+.sidebar-nav h3 {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-muted);
+    margin: 1rem 0 0.5rem 0;
+}
 
-        const cities = Object.keys(grouped);
-        const energyAvg = cities.map(c => grouped[c].energy / grouped[c].count);
-        const wasteAvg = cities.map(c => grouped[c].waste / grouped[c].count);
-        const renAvg = cities.map(c => grouped[c].ren / grouped[c].count);
+.nav-link {
+    display: block;
+    padding: 0.75rem 1rem;
+    color: var(--text-muted);
+    text-decoration: none;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    font-size: 0.95rem;
+    font-weight: 500;
+}
 
-        if (radarChartInstance) radarChartInstance.destroy();
+.nav-link:hover, .nav-link.active {
+    background-color: var(--card-bg);
+    color: var(--text-main);
+}
 
-        radarChartInstance = new Chart(ctx, {
-            type: 'radar',
-            data: {
-                labels: cities,
-                datasets: [
-                    {
-                        label: 'Avg Energy',
-                        data: energyAvg,
-                        borderColor: '#00f2fe',
-                        backgroundColor: 'rgba(0, 242, 254, 0.2)'
-                    },
-                    {
-                        label: 'Avg Waste',
-                        data: wasteAvg,
-                        borderColor: '#ef4444',
-                        backgroundColor: 'rgba(239, 68, 68, 0.2)'
-                    },
-                    {
-                        label: 'Avg Renewable',
-                        data: renAvg,
-                        borderColor: '#4facfe',
-                        backgroundColor: 'rgba(79, 172, 254, 0.2)'
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    r: {
-                        grid: { color: 'rgba(255,255,255,0.1)' },
-                        angleLines: { color: 'rgba(255,255,255,0.1)' },
-                        pointLabels: { color: '#9ca3af' }
-                    }
-                }
-            }
-        });
-    };
+.nav-link.active {
+    border-left: 3px solid var(--accent-electric);
+}
 
-    const updatePolarAreaChart = (data) => {
-        const ctx = document.getElementById('polarAreaChart').getContext('2d');
-        
-        const grouped = {};
-        data.forEach(d => {
-            if (!grouped[d.city]) grouped[d.city] = 0;
-            grouped[d.city] += d.wasteGenerated;
-        });
+.filter-group {
+    margin-bottom: 1rem;
+}
 
-        if (polarAreaChartInstance) polarAreaChartInstance.destroy();
+.filter-group label {
+    display: block;
+    font-size: 0.875rem;
+    margin-bottom: 0.5rem;
+    color: var(--text-muted);
+}
 
-        polarAreaChartInstance = new Chart(ctx, {
-            type: 'polarArea',
-            data: {
-                labels: Object.keys(grouped),
-                datasets: [{
-                    label: 'Total Waste Generated',
-                    data: Object.values(grouped),
-                    backgroundColor: [
-                        'rgba(239, 68, 68, 0.7)',
-                        'rgba(245, 158, 11, 0.7)',
-                        'rgba(16, 185, 129, 0.7)',
-                        'rgba(59, 130, 246, 0.7)',
-                        'rgba(139, 92, 246, 0.7)'
-                    ]
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    r: { grid: { color: 'rgba(255,255,255,0.1)' } }
-                }
-            }
-        });
-    };
+select {
+    width: 100%;
+    padding: 0.75rem;
+    border-radius: 8px;
+    background-color: var(--bg-dark);
+    border: 1px solid var(--border-color);
+    color: var(--text-main);
+    font-family: 'Inter', sans-serif;
+    outline: none;
+    transition: box-shadow 0.3s, border-color 0.3s;
+    appearance: none;
+    cursor: pointer;
+}
 
-    const updateTrendChart = (data) => {
-        const ctx = document.getElementById('trendChart').getContext('2d');
-        
-        // Group by Month if simple, or Year-Month if all
-        const grouped = {};
-        data.forEach(d => {
-            const key = `M${d.month}`;
-            if (!grouped[key]) grouped[key] = { energy: 0, waste: 0 };
-            grouped[key].energy += d.energyConsumption;
-            grouped[key].waste += d.wasteGenerated;
-        });
+option {
+    background-color: var(--bg-dark);
+    color: var(--text-main);
+}
 
-        const labels = Object.keys(grouped);
-        const energyData = labels.map(l => grouped[l].energy);
-        const wasteData = labels.map(l => grouped[l].waste);
+select:focus {
+    border-color: var(--text-muted);
+}
 
-        if (trendChartInstance) trendChartInstance.destroy();
+.year-select {
+    border-left: 3px solid var(--accent-warning);
+    background-color: rgba(245, 158, 11, 0.05);
+}
+.year-select:focus {
+    border-color: var(--accent-warning);
+}
 
-        trendChartInstance = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: labels,
-                datasets: [
-                    {
-                        label: 'Energy (GWh)',
-                        data: energyData,
-                        borderColor: '#00f2fe',
-                        backgroundColor: 'rgba(0, 242, 254, 0.1)',
-                        borderWidth: 2,
-                        fill: true,
-                        tension: 0.4
-                    },
-                    {
-                        label: 'Waste (Metric Tons)',
-                        data: wasteData,
-                        borderColor: '#f59e0b',
-                        backgroundColor: 'transparent',
-                        borderWidth: 2,
-                        borderDash: [5, 5],
-                        fill: false,
-                        tension: 0.4
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { position: 'top' } },
-                scales: {
-                    y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' } },
-                    x: { grid: { display: false } }
-                }
-            }
-        });
-    };
+.month-select {
+    border-left: 3px solid var(--accent-mint);
+    background-color: rgba(79, 172, 254, 0.05);
+}
+.month-select:focus {
+    border-color: var(--accent-mint);
+}
 
-    const updateRenewableChart = (data) => {
-        const ctx = document.getElementById('renewableChart').getContext('2d');
-        
-        // Group by city for distribution
-        const grouped = {};
-        data.forEach(d => {
-            if (!grouped[d.city]) grouped[d.city] = 0;
-            grouped[d.city] += d.renewableEnergy;
-        });
+.city-select {
+    border-left: 3px solid #818cf8; /* Distinct purple-blue for city */
+    background-color: rgba(129, 140, 248, 0.05);
+}
+.city-select:focus {
+    border-color: #818cf8;
+}
 
-        if (renewableChartInstance) renewableChartInstance.destroy();
+.view-toggle button {
+    width: 100%;
+    padding: 0.875rem;
+    margin-bottom: 0.5rem;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--text-muted);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: left;
+    padding-left: 1rem;
+    border: 1px solid transparent;
+}
 
-        renewableChartInstance = new Chart(ctx, {
-            type: 'doughnut',
-            data: {
-                labels: Object.keys(grouped),
-                datasets: [{
-                    data: Object.values(grouped),
-                    backgroundColor: ['#00f2fe', '#4facfe', '#38bdf8', '#818cf8', '#a78bfa'],
-                    borderWidth: 0,
-                    hoverOffset: 10
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                cutout: '70%',
-                plugins: {
-                    legend: { position: 'bottom' }
-                }
-            }
-        });
-    };
+.view-toggle button:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+}
 
-    const updateCityComparisonChart = (data) => {
-        const ctx = document.getElementById('cityComparisonChart').getContext('2d');
-        
-        const grouped = {};
-        data.forEach(d => {
-            if (!grouped[d.city]) grouped[d.city] = { energy: 0, waste: 0 };
-            grouped[d.city].energy += d.energyConsumption;
-            grouped[d.city].waste += d.wasteGenerated;
-        });
+.view-toggle button.active {
+    background: linear-gradient(90deg, rgba(79, 172, 254, 0.15), transparent);
+    color: var(--accent-electric);
+    border-left: 3px solid var(--accent-electric);
+}
 
-        if (cityComparisonChartInstance) cityComparisonChartInstance.destroy();
+/* Main Content */
+.main-content {
+    flex: 1;
+    padding: 2rem 3rem;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    position: relative;
+    transition: all 0.3s ease;
+}
 
-        cityComparisonChartInstance = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: Object.keys(grouped),
-                datasets: [
-                    {
-                        label: 'Energy Consumed',
-                        data: Object.values(grouped).map(d => d.energy),
-                        backgroundColor: '#4facfe',
-                        borderRadius: 4
-                    },
-                    {
-                        label: 'Waste Generated',
-                        data: Object.values(grouped).map(d => d.waste),
-                        backgroundColor: '#ef4444',
-                        borderRadius: 4
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    y: { grid: { color: 'rgba(255,255,255,0.05)' } },
-                    x: { grid: { display: false } }
-                }
-            }
-        });
-    };
+.desktop-toggle-btn {
+    display: none;
+    position: absolute;
+    top: 2rem;
+    left: 1rem;
+    background: transparent;
+    border: none;
+    color: var(--text-main);
+    padding: 0.5rem;
+    border-radius: 8px;
+    cursor: pointer;
+    z-index: 50;
+    transition: background 0.3s ease;
+}
 
-    const updateBubbleChart = (data) => {
-        const ctx = document.getElementById('bubbleChart').getContext('2d');
-        
-        const grouped = {};
-        data.forEach(d => {
-            if (!grouped[d.city]) grouped[d.city] = { p: 0, e: 0, w: 0, count: 0 };
-            grouped[d.city].p += d.population;
-            grouped[d.city].e += d.energyConsumption;
-            grouped[d.city].w += d.wasteGenerated;
-            grouped[d.city].count += 1;
-        });
+.desktop-toggle-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
 
-        const bubbleData = Object.keys(grouped).map(city => {
-            const avg = grouped[city];
-            return {
-                x: avg.e / avg.count, // Energy on X
-                y: avg.w / avg.count, // Waste on Y
-                r: (avg.p / avg.count) / 50000, // Size by Population
-                city: city
-            };
-        });
-
-        if (bubbleChartInstance) bubbleChartInstance.destroy();
-
-        bubbleChartInstance = new Chart(ctx, {
-            type: 'bubble',
-            data: {
-                datasets: [{
-                    label: 'Cities',
-                    data: bubbleData,
-                    backgroundColor: 'rgba(0, 242, 254, 0.6)',
-                    borderColor: '#00f2fe'
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    tooltip: {
-                        callbacks: {
-                            label: (ctx) => `${ctx.raw.city}: E=${Math.round(ctx.raw.x)}, W=${Math.round(ctx.raw.y)}`
-                        }
-                    }
-                },
-                scales: {
-                    y: { title: { display: true, text: 'Avg Waste' }, grid: { color: 'rgba(255,255,255,0.05)' } },
-                    x: { title: { display: true, text: 'Avg Energy' }, grid: { color: 'rgba(255,255,255,0.05)' } }
-                }
-            }
-        });
-    };
-
-    // Live Dashboard Functionality
-    const initLiveDashboard = () => {
-        const ctx = document.getElementById('liveStreamChart').getContext('2d');
-        
-        let liveLabels = Array.from({length: 20}, (_, i) => `T-${20-i}s`);
-        let energyStream = Array.from({length: 20}, () => 400 + Math.random() * 50);
-        let wasteStream = Array.from({length: 20}, () => 100 + Math.random() * 20);
-        
-        if (liveChartInstance) liveChartInstance.destroy();
-
-        liveChartInstance = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: liveLabels,
-                datasets: [
-                    {
-                        label: 'Instant Energy Load (MW)',
-                        data: energyStream,
-                        borderColor: '#00f2fe',
-                        backgroundColor: 'rgba(0, 242, 254, 0.2)',
-                        fill: true,
-                        tension: 0.3
-                    },
-                    {
-                        label: 'Instant Waste Processing (Tonnes/Hr)',
-                        data: wasteStream,
-                        borderColor: '#ef4444',
-                        backgroundColor: 'transparent',
-                        borderDash: [5, 5],
-                        fill: false,
-                        tension: 0.3
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                animation: { duration: 0 },
-                scales: {
-                    y: { suggestedMin: 50, suggestedMax: 500, grid: { color: 'rgba(255,255,255,0.05)' } },
-                    x: { grid: { display: false } }
-                }
-            }
-        });
+@media (min-width: 769px) {
+    .desktop-toggle-btn {
+        display: block;
+    }
+    .main-content header h1 {
+        padding-left: 2rem;
+    }
+    .main-content header p {
+        padding-left: 2rem;
+    }
+    .pulse-indicator {
+        margin-left: 2rem;
+    }
+}
 
 
-        liveInterval = setInterval(() => {
-            // Shift arrays
-            energyStream.shift();
-            wasteStream.shift();
-            
-            // Add new data
-            const newEnergy = 400 + Math.random() * 50;
-            const newWaste = 100 + Math.random() * 20;
-            energyStream.push(newEnergy);
-            wasteStream.push(newWaste);
+.hidden {
+    display: none !important;
+}
 
+header h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
 
-            liveChartInstance.update();
+header p {
+    color: var(--text-muted);
+}
 
-            // Update Live KPIs
-            document.getElementById('liveEnergy').textContent = Math.round(newEnergy);
-            document.getElementById('liveWaste').textContent = Math.round(newWaste);
+/* Glassmorphism utility */
+.glassmorphism {
+    background: var(--card-bg);
+    backdrop-filter: blur(16px);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+}
 
-            document.getElementById('liveEnergyGen').textContent = Math.round(newEnergy * 1.25 + Math.random() * 20);
-            document.getElementById('liveRenewable').textContent = Math.round(newEnergy * 0.35 + Math.random() * 15);
-            
-        }, 2000);
-    };
+/* KPIs */
+.kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5rem;
+}
 
-    const stopLiveDashboard = () => {
-        if (liveInterval) {
-            clearInterval(liveInterval);
-            liveInterval = null;
-        }
-    };
+.kpi-card {
+    padding: 1.5rem;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
 
-    const updateEnergyMatrixChart = (data) => {
-        const ctx = document.getElementById('energyMatrixChart').getContext('2d');
-        
-        let solar = 0, wind = 0, hydro = 0, coal = 0, gas = 0;
-        data.forEach(d => {
-            solar += d.renewableEnergy * 0.45;
-            wind += d.renewableEnergy * 0.35;
-            hydro += d.renewableEnergy * 0.20;
-            coal += (d.energyConsumption - d.renewableEnergy) * 0.65;
-            gas += (d.energyConsumption - d.renewableEnergy) * 0.35;
-        });
+.kpi-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
 
-        if (energyMatrixChartInstance) energyMatrixChartInstance.destroy();
+.kpi-title {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    margin-bottom: 0.5rem;
+}
 
-        energyMatrixChartInstance = new Chart(ctx, {
-            type: 'doughnut',
-            data: {
-                labels: ['Solar', 'Wind', 'Hydro', 'Coal', 'Natural Gas'],
-                datasets: [{
-                    data: [solar, wind, hydro, coal, gas],
-                    backgroundColor: ['#fb923c', '#34d399', '#38bdf8', '#475569', '#9ca3af'],
-                    borderWidth: 0
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { position: 'right', labels: { color: '#9ca3af' } } },
-                cutout: '65%'
-            }
-        });
-    };
+.kpi-card h3 {
+    font-size: 2rem;
+    font-weight: 700;
+}
 
-    const updateRecyclingChart = (data) => {
-        const ctx = document.getElementById('recyclingChart').getContext('2d');
-        
-        const grouped = {};
-        data.forEach(d => {
-            if (!grouped[d.city]) grouped[d.city] = { waste: 0, recycled: 0 };
-            grouped[d.city].waste += d.wasteGenerated;
-            grouped[d.city].recycled += d.wasteGenerated * (0.35 + (Math.random() * 0.2)); 
-        });
+.trend {
+    font-size: 0.875rem;
+    margin-top: 0.5rem;
+}
 
-        const cities = Object.keys(grouped);
-        const landfill = cities.map(c => grouped[c].waste - grouped[c].recycled);
-        const recycled = cities.map(c => grouped[c].recycled);
+/* Charts Section */
+.charts-section {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 1.5rem;
+}
 
-        if (recyclingChartInstance) recyclingChartInstance.destroy();
+.chart-container {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+}
 
-        recyclingChartInstance = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: cities,
-                datasets: [
-                    { label: 'Recycled Matrix', data: recycled, backgroundColor: '#34d399' },
-                    { label: 'Landfill Waste', data: landfill, backgroundColor: '#ef4444' }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    x: { stacked: true, grid: { display: false }, ticks: { color: '#9ca3af' } },
-                    y: { stacked: true, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#9ca3af' } }
-                },
-                plugins: { legend: { labels: { color: '#9ca3af' } } }
-            }
-        });
-    };
+.chart-container h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: var(--text-main);
+}
 
-    // Event Listeners
-    yearFilter.addEventListener('change', updateDashboard);
-    monthFilter.addEventListener('change', updateDashboard);
-    cityFilter.addEventListener('change', updateDashboard);
+.canvas-wrapper {
+    flex: 1;
+    position: relative;
+    min-height: 250px;
+}
 
-    const sidebarToggle = document.getElementById('sidebarToggle');
-    if (sidebarToggle) {
-        sidebarToggle.addEventListener('click', () => {
-            document.querySelector('.sidebar').classList.toggle('collapsed');
-            // Trigger window resize after transition so charts fit to new layout
-            setTimeout(() => {
-                window.dispatchEvent(new Event('resize'));
-            }, 300);
-        });
+/* Live View Specifics */
+.live-kpis {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+.pulse-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--accent-danger);
+    font-weight: 600;
+    font-size: 0.875rem;
+    margin-top: 0.5rem;
+}
+
+.pulse {
+    width: 10px;
+    height: 10px;
+    background-color: var(--accent-danger);
+    border-radius: 50%;
+    animation: pulse-anim 1.5s infinite;
+}
+
+@keyframes pulse-anim {
+    0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+    70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+    100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+}
+
+.live-card {
+    border-top: 3px solid var(--accent-electric);
+}
+
+.live-canvas {
+    min-height: 400px;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+    .kpi-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .chart-container[style] {
+        grid-column: span 12 !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .dashboard-container {
+        flex-direction: column;
+        height: auto;
+    }
+
+    .sidebar {
+        width: 100%;
+        padding: 1rem;
+        border-right: none;
+        border-bottom: 1px solid var(--border-color);
+        gap: 1rem;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+    }
+
+    .logo {
+        flex-direction: row !important;
+        margin-bottom: 0.5rem !important;
+        justify-content: flex-start !important;
+        text-align: left !important;
+    }
+
+    .logo img {
+        width: 60px !important;
+    }
+
+    .sidebar-nav {
+        flex-direction: row;
+        flex-wrap: wrap;
+    }
+
+    .sidebar-nav h3 {
+        width: 100%;
+        margin: 0.5rem 0;
+    }
+
+    .nav-link {
+        flex: 1 1 calc(50% - 0.5rem);
+        text-align: center;
+        padding: 0.5rem;
+        font-size: 0.85rem;
+    }
+
+    .main-content {
+        padding: 1rem;
+        overflow-y: visible;
+    }
+
+    .historic-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .inline-filters {
+        width: 100%;
+        flex-wrap: wrap;
+        gap: 0.5rem !important;
+    }
+
+    .filter-group {
+        flex: 1 1 calc(33.33% - 0.5rem);
+        min-width: unset !important;
+        margin: 0;
+    }
+
+    header h1 {
+        font-size: 1.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .kpi-grid {
+        grid-template-columns: 1fr;
     }
     
-    // Initialize View
-    updateDashboard();
-    initLiveDashboard();
-
-    // Initialize Google Map
-    const drawIndiaMap = () => {
-        if (!window.google || !window.google.visualization) return;
-        
-        const stateData = window.indiaStateData;
-        const dataTable = new google.visualization.DataTable();
-        dataTable.addColumn('string', 'State ID');
-        dataTable.addColumn('string', 'State Name');
-        dataTable.addColumn('number', 'Energy (GWh)');
-        dataTable.addColumn('number', 'Waste (k Tons)');
-
-        stateData.forEach(s => {
-            dataTable.addRow([s.id, s.name, s.energy, s.waste]);
-        });
-
-        const options = {
-            region: 'IN',
-            domain: 'IN',
-            displayMode: 'regions',
-            resolution: 'provinces',
-            backgroundColor: 'transparent',
-            datalessRegionColor: 'rgba(255,255,255,0.05)',
-            defaultColor: '#00f2fe',
-            colorAxis: {colors: ['#0369a1', '#0ea5e9', '#38bdf8', '#00f2fe']}
-        };
-
-        const chart = new google.visualization.GeoChart(document.getElementById('indiaMapContainer'));
-        chart.draw(dataTable, options);
-    };
-
-    if (window.google) {
-        google.charts.load('current', {
-            'packages': ['geochart']
-        });
-        google.charts.setOnLoadCallback(drawIndiaMap);
+    .nav-link {
+        flex: 1 1 100%;
     }
-});
+    
+    .filter-group {
+        flex: 1 1 100%;
+    }
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+    width: 8px;
+}
+::-webkit-scrollbar-track {
+    background: var(--bg-dark);
+}
+::-webkit-scrollbar-thumb {
+    background: #334155;
+    border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #475569;
+}
