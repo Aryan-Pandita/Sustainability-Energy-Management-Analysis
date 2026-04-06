@@ -1,6 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     const rawData = window.dashboardData;
     
+    // UI Elements
     const yearFilter = document.getElementById('yearFilter');
     const monthFilter = document.getElementById('monthFilter');
     const cityFilter = document.getElementById('cityFilter');
@@ -10,6 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const kpiRenewable = document.getElementById('kpiRenewable');
     const kpiPopulation = document.getElementById('kpiPopulation');
 
+    // Chart Instances
     let trendChartInstance = null;
     let renewableChartInstance = null;
     let cityComparisonChartInstance = null;
@@ -23,6 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let liveInterval = null;
 
+    // Theme Config
     Chart.defaults.color = '#9ca3af';
     Chart.defaults.font.family = "'Inter', sans-serif";
 
@@ -501,8 +504,38 @@ document.addEventListener('DOMContentLoaded', () => {
     monthFilter.addEventListener('change', updateDashboard);
     cityFilter.addEventListener('change', updateDashboard);
 
+    const sidebarToggle = document.getElementById('sidebarToggle');
+    const mobileSidebarToggle = document.getElementById('mobileSidebarToggle');
+    const sidebar = document.querySelector('.sidebar');
 
+    if (sidebarToggle) {
+        sidebarToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('collapsed');
+            // Trigger window resize after transition so charts fit to new layout
+            setTimeout(() => {
+                window.dispatchEvent(new Event('resize'));
+            }, 300);
+        });
+    }
 
+    if (mobileSidebarToggle) {
+        if (window.innerWidth <= 768) {
+            sidebar.classList.add('collapsed');
+        }
+        mobileSidebarToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('collapsed');
+        });
+    }
+
+    const navLinks = document.querySelectorAll('.nav-link');
+    navLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+            if (window.innerWidth <= 768) {
+                sidebar.classList.add('collapsed');
+            }
+        });
+    });
+    
     // Initialize View
     updateDashboard();
     initLiveDashboard();
